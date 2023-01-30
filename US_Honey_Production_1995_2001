@@ -1,0 +1,42 @@
+select * from `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021`
+
+
+##Removing NULL values from state
+DELETE FROM `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021` where state is NULL
+
+
+##Removing rows where Yield is less than 10
+DELETE FROM `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021`where yield_per_colony <10
+
+
+##Identifying which state has highest production in 2021 - South Dakota ranks first
+select year, production, state from `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021` where year=2021 order by production DESC
+
+##Identifying total production of each year
+select year, SUM(production) as total_production from `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021`
+group by year order by total_production desc
+
+
+##Identifying state with total highest production in all years
+select state, sum(production) as total_state_production from `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021`group by state order by total_state_production desc
+
+
+##Calculating total value of production in all years
+select state, sum(value_of_production) as total_value_of_production from `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021` group by state order by total_value_of_production desc
+
+
+##Calculating the latest stock of each state
+select state, sum(stocks) as total_stocks from `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021`
+where year=2021
+group by state
+order by total_stocks desc
+
+
+##Calculating expected yield for year 2022
+select state, colonies_number * yield_per_colony as expected_yield_for_2022 from `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021`where year=2021 order by expected_yield_for_2022 desc
+
+##Identifyint why North Dakota is expected to be higher producer even though it has less stocks than South Dakota
+select * from `geometric-bay-361618.US_honey_production_1005_2021.US_honey_production_1995_2021` 
+where year = 2021
+and state='NorthDakota'
+
