@@ -1,0 +1,42 @@
+
+#DELETING NULL VALUES
+DELETE FROM `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` WHERE gender is NULL
+
+##ADDING A NEW COULUMN TO CALCULATE TRIP DURATION
+ALTER TABLE `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` ADD COLUMN trip_duration FLOAT64
+
+##CALCULATING TIMESTAMP DIFFERENCE AND INSERTING THE VALUES INTO trip_duration column
+UPDATE `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` SET trip_duration = TIMESTAMP_DIFF(end_time, start_time, minute) WHERE trip_duration is NULL
+
+SELECT * FROM `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` ORDER BY trip_duration DESC
+
+
+##Checking number of trips that are more than 24 Hrs (1440 mins)
+select * from `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` where trip_duration >1440
+
+##Deleting the rows with trip duration more than 24 hours as they are very less in number (880 rows)
+delete from `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` where trip_duration>1440
+
+##Adding column to accomodate day of the week and updating the column
+Alter table `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` ADD COLUMN day_of_the_week INT64
+
+UPDATE `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` SET day_of_the_week=extract (dayofweek from start_time) where day_of_the_week is NULL
+
+##Adding column to accomodate name of the ride starting days and updating the column
+ALTER TABLE `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` ADD COLUMN day STRING
+
+update `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters`
+SET day='Sunday' where day_of_the_week=7
+------------(Multiple Queries performed individually to update names of the week)----------
+
+##Deleting the column day_of_the_week
+alter table `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` drop column day_of_the_week
+
+##Renaming the column from day to ride_start_day
+select * except (day), day as ride_start_day from `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters`
+
+##Creating a new column to accomodate the ride start month
+ALTER TABLE `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` ADD COLUMN ride_begining_month STRING
+
+##Extract month from start date and update the new column
+update `geometric-bay-361618.Divvy_trips_2019_all.Divvy_trips_2019_all_quarters` SET ride_start_month=extract (month from start_time) where ride_start_month is NULL
