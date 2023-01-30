@@ -1,0 +1,87 @@
+select * from `my-second-project-370721.my_activity_2022.my_activity`
+
+##Renaming the column from Date to activity_day
+select * except (Date), Date as activity_day from `my-second-project-370721.my_activity_2022.my_activity`
+
+
+## max heart points and the date
+select Date, Heart_Points from `my-second-project-370721.my_activity_2022.my_activity` order by Heart_Points desc
+
+## max calories burnt
+select Date, Calories__kcal_ from `my-second-project-370721.my_activity_2022.my_activity` order by Calories__kcal_ desc
+
+## Which date has maximum step count
+select Date, Step_count, Calories__kcal_ from `my-second-project-370721.my_activity_2022.my_activity` 
+where Step_count is not NULL 
+And Calories__kcal_ is not NULL
+order by Step_count DESC
+
+## Which date has minimum step count
+select Date, Step_count from `my-second-project-370721.my_activity_2022.my_activity` where Step_count is not NULL order by Step_count
+
+
+## Identifying which days of the week has more activity: Weekends more activity
+SELECT 
+  DATE(Date) AS day,
+  Step_count, 
+  (((Walking_duration__ms_)/1000)/60)/60 AS walking_hours_per_day,
+  Move_Minutes_count,
+  FORMAT_DATE('%a', DATE(Date)) AS weekday_name_abbreviated,
+  FORMAT_DATE('%A', DATE(Date)) AS weekday_name_full  
+  from `my-second-project-370721.my_activity_2022.my_activity` 
+  where Step_count is not NULL
+  and Walking_duration__ms_ is not NULL
+  order by Step_count desc
+  
+
+## Longest distance
+select MAX((Distance__m_)/1000) as maximum_distance_km from `my-second-project-370721.my_activity_2022.my_activity` 
+where Distance__m_ is not NULL
+group by Distance__m_
+order by Distance__m_ desc
+
+
+
+## Heart Rate
+select
+MIN(Min_heart_rate__bpm_)as minimum_heart_rate, 
+MAX(Max_heart_rate__bpm_) as maximum_heart_rate
+from `my-second-project-370721.my_activity_2022.my_activity`
+
+
+
+## Physical activity based on steps
+select 
+    Date, 
+    Step_count,
+    case 
+        when Step_count < 2000 THEN  'very_low_physical_activity'
+        when Step_count >= 2001 and Step_count < 5000 THEN 'low_physical_activity'
+        when Step_count >= 5001 and Step_count < 7500 THEN 'moderate_physical_activity'
+        when Step_count >= 7501 and Step_count < 10000 THEN 'high_physical_activity'
+        else 'very_high_physical_activity'
+    end as Physical_activity
+from `my-second-project-370721.my_activity_2022.my_activity`
+order by Step_count DESC
+
+
+##Calculate total steps for each type of activity and its percentage
+SELECT
+    Type_of_Physical_Activity,
+    num_of_times,
+    Total_steps,
+    ROUND(100*Total_steps/(SUM(Total_steps) OVER()), 3) as ActivityPercentage
+FROM (SELECT
+ (case when Step_count < 2000 then 'Very Low Physical Activity'
+             when Step_count >= 2001 and Step_count <5000 then 'Low Physical Activity'
+             when Step_count >= 5001 and Step_count< 7500 then 'Moderate Physical Activity'
+             when Step_count >= 7501 and Step_count <10000 then 'High Physical Activity'
+             when Step_count > 10001 then 'Very High Physical Activity'
+             else 'no_physical_activity'
+        end) as Type_of_Physical_Activity,
+       COUNT(*) as num_of_times,
+       SUM(Step_count) as Total_steps,
+                            from `my-second-project-370721.my_activity_2022.my_activity`
+              Where Step_count is not NULL
+       group by  Type_of_Physical_Activity
+       order by MIN(Step_count))
